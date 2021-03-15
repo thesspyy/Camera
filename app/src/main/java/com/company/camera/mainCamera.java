@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -31,83 +32,64 @@ import java.util.List;
 
 public class mainCamera extends Activity implements View.OnClickListener{
     Button btnCam;
-
+    private ImageView imageView;
     private static  final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    private static final int CAMERA_REQUEST = 1888;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.camera_main);
+        this.imageView = (ImageView)this.findViewById(R.id.imageView1);
         btnCam = (Button)findViewById(R.id.btnCamera);
         btnCam.setOnClickListener(this);
+    }
 
-       // android 7.0 system to solve the problem of camera
-//        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-//        StrictMode.setVmPolicy(builder.build());
-//        builder.detectFileUriExposure();
-
-        //ตรวจสอบการมีข้อมูลอยู่
-        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
-            try{
-                File f = Environment.getExternalStoragePublicDirectory("myPhoto");
-                File[] sd = f.listFiles();
-
-                LinearLayout content = (LinearLayout)this.findViewById(R.id.LyLO);
-                content.removeAllViews();
-
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize=8;
-
-                for(int i=0 ; i < sd.length ; i++){
-                    ImageView img = new ImageView(this);
-                    Bitmap bMap = BitmapFactory.decodeFile(sd[i].toString(),options);
-                    img.setImageBitmap(bMap);
-                    content.addView(img);
-
-                    TextView textV = new TextView(this);
-                    textV.setText(sd[i].toString());
-                    content.addView(textV);
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btnCamera:
+                if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.CAMERA}, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                } else {
+                    Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(cameraIntent, CAMERA_REQUEST);
                 }
-            }catch (Exception e){
-                Log.d("Error",e.toString());
-            }
         }
     }
+
+
+
     @Override
-    public void onClick(View v){
-        startCameraActivity();
-    }
-
-    protected void startCameraActivity(){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-        String picTime = sdf.format(new Date());
-
-        String _path_pic = Environment.getExternalStorageDirectory()+"/myPhoto/"+picTime+".jpg";
-
-        File file = new File(_path_pic);
-
-       // Uri outputFileUri = Uri.fromFile(file);
-
-        Uri outputFileUri = FileProvider.getUriForFile(this,
-                "com.example.android.fileprovider", file);
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT,outputFileUri);
-        startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
-
-
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE)
+        {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
+            {
+                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+            }
+            else
+            {
+                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE){
-            if(requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK){
-                Toast.makeText(this,"Image saved.", Toast.LENGTH_LONG).show();
+            if(requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK){
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                imageView.setImageBitmap(photo);
 
             } else if (resultCode == RESULT_CANCELED) {
                 Toast.makeText(this, "User cancel", Toast.LENGTH_SHORT).show();
             }else {
                 Toast.makeText(this,"Can't save", Toast.LENGTH_LONG).show();
             }
-        }
+
     }
 }

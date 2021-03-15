@@ -11,17 +11,6 @@
         android:layout_height="wrap_content"
         android:text="take"></Button>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="278dp">
-
-        <LinearLayout
-            android:id="@+id/LyLO"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
-    </ScrollView>
-
     <ImageView
         android:id="@+id/imageView1"
         android:layout_width="match_parent"

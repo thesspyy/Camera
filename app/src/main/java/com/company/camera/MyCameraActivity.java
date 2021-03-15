@@ -34,11 +34,10 @@ public class MyCameraActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.camera_main);
+        setContentView(R.layout.main);
         this.imageView = (ImageView)this.findViewById(R.id.imageView1);
-        Button photoButton = (Button) this.findViewById(R.id.btnCamera);
+        Button photoButton = (Button) this.findViewById(R.id.button1);
         photoButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -55,7 +54,6 @@ public class MyCameraActivity extends Activity
                 }
             }
         });
-
     }
 
     @Override
@@ -66,22 +64,8 @@ public class MyCameraActivity extends Activity
         {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED)
             {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-                String picTime = sdf.format(new Date());
-
-                String _path_pic = Environment.getExternalStorageDirectory()+"/myPhoto/"+picTime+".jpg";
-
-                File file = new File(_path_pic);
-
-                Uri outputFileUri = Uri.fromFile(file);
-
-                // Uri outputFileUri = FileProvider.getUriForFile(this,
-                //         "com.example.android.fileprovider", file);
-
-
                 Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT,outputFileUri);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
             }
             else
@@ -96,11 +80,8 @@ public class MyCameraActivity extends Activity
     {
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
         {
-
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-
             imageView.setImageBitmap(photo);
-
-    }
+        }
     }
 }
